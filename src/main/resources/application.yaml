@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: ${APP_NAME:smartguard-backend}
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/smartguard}
+    username: ${DATABASE_USERNAME:smartguard}
+    password: ${DATABASE_PASSWORD:smartguard_dev_password}
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:true}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    properties:
+      hibernate:
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    io.github.imecuadorian: ${LOG_LEVEL_APP:DEBUG}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+smartguard:
+  app:
+    env: ${APP_ENV:development}
+    version: ${APP_VERSION:0.0.1}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:19006}
+
+  mqtt:
+    enabled: ${MQTT_ENABLED:true}
+    broker-url: ${MQTT_BROKER_URL:tcp://localhost:1883}
+    client-id: ${MQTT_CLIENT_ID:smartguard-backend}
+    username: ${MQTT_USERNAME:}
+    password: ${MQTT_PASSWORD:}
+    topic-prefix: ${MQTT_TOPIC_PREFIX:smartguard}
+
+  websocket:
+    allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:19006}
+    endpoint: ${WEBSOCKET_ENDPOINT:/ws}
+    topic-prefix: ${WEBSOCKET_TOPIC_PREFIX:/topic}
+    app-prefix: ${WEBSOCKET_APP_PREFIX:/app}
+
+  jwt:
+    secret: ${JWT_SECRET:change_me_minimum_32_characters}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+    refresh-expiration-days: ${JWT_REFRESH_EXPIRATION_DAYS:7}
+
+  monitoring:
+    silence-monitor:
+      enabled: ${SENSOR_SILENCE_MONITOR_ENABLED:true}
+      fixed-delay-ms: ${SENSOR_SILENCE_MONITOR_FIXED_DELAY_MS:60000}
+
+  expo:
+    push-enabled: ${EXPO_PUSH_ENABLED:false}
+    access-token: ${EXPO_PUSH_ACCESS_TOKEN:}

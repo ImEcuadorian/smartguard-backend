@@ -1,0 +1,820 @@
+{
+  "info": {
+    "name": "SmartGuard Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "deviceId",
+      "value": ""
+    },
+    {
+      "key": "deviceCode",
+      "value": "esp32-001"
+    },
+    {
+      "key": "deviceApiKey",
+      "value": ""
+    },
+    {
+      "key": "sensorId",
+      "value": ""
+    },
+    {
+      "key": "sensorCode",
+      "value": "gas-main"
+    },
+    {
+      "key": "sensorAlertRuleId",
+      "value": ""
+    },
+    {
+      "key": "readerId",
+      "value": ""
+    },
+    {
+      "key": "readerCode",
+      "value": "rfid-main"
+    },
+    {
+      "key": "cardId",
+      "value": ""
+    },
+    {
+      "key": "cardUid",
+      "value": "A1:B2:C3:D4"
+    },
+    {
+      "key": "actuatorId",
+      "value": ""
+    },
+    {
+      "key": "actuatorCode",
+      "value": "door-lock"
+    },
+    {
+      "key": "alertId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "auth": {
+            "type": "noauth"
+          },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/actuator/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Bootstrap Admin",
+          "auth": {
+            "type": "noauth"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/bootstrap-admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin12345\",\n  \"displayName\": \"SmartGuard Admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "auth": {
+            "type": "noauth"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin12345\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "auth": {
+            "type": "noauth"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "Change My Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me/password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Admin12345\",\n  \"newPassword\": \"Admin12345\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "auth": {
+            "type": "noauth"
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/logout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create Operator User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('userId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"operator\",\n  \"password\": \"Operator12345\",\n  \"displayName\": \"SmartGuard Operator\",\n  \"role\": \"OPERATOR\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/users"
+          }
+        },
+        {
+          "name": "Disable User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DISABLED\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Devices",
+      "item": [
+        {
+          "name": "Create Device",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('deviceId', json.device.id);",
+                  "  pm.collectionVariables.set('deviceCode', json.device.code);",
+                  "  pm.collectionVariables.set('deviceApiKey', json.apiKey);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/devices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{deviceCode}}\",\n  \"name\": \"ESP32 Main Door\",\n  \"location\": \"Main entrance\",\n  \"ipAddress\": \"192.168.1.50\",\n  \"firmwareVersion\": \"1.0.0\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Devices",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/devices"
+          }
+        },
+        {
+          "name": "Get Device By Id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/devices/{{deviceId}}"
+          }
+        },
+        {
+          "name": "Update Device",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/devices/{{deviceId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ESP32 Main Door Updated\",\n  \"location\": \"Main entrance lab\",\n  \"firmwareVersion\": \"1.0.1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Device Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/devices/{{deviceId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"MAINTENANCE\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sensors",
+      "item": [
+        {
+          "name": "Create Sensor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('sensorId', json.id);",
+                  "  pm.collectionVariables.set('sensorCode', json.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/sensors",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"code\": \"{{sensorCode}}\",\n  \"name\": \"Gas sensor main\",\n  \"type\": \"GAS\",\n  \"unit\": \"ppm\",\n  \"location\": \"Main entrance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Sensors",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sensors"
+          }
+        },
+        {
+          "name": "Get Sensor By Id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}"
+          }
+        },
+        {
+          "name": "Update Sensor Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Sensor Reading",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/readings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numericValue\": 25.5,\n  \"booleanValue\": null,\n  \"textValue\": null,\n  \"recordedAt\": \"{{$isoTimestamp}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Sensor Readings",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/readings"
+          }
+        },
+        {
+          "name": "List Sensor Readings Filtered",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/readings?from=2026-06-04T00:00:00Z&to=2026-06-04T23:59:59Z&limit=50"
+          }
+        },
+        {
+          "name": "Get Latest Sensor Reading",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/readings/latest"
+          }
+        },
+        {
+          "name": "Create Gas Threshold Rule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('sensorAlertRuleId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/alert-rules",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"NUMERIC_THRESHOLD\",\n  \"operator\": \"GREATER_THAN\",\n  \"thresholdValue\": 700,\n  \"expectedBooleanValue\": null,\n  \"durationMinutes\": null,\n  \"alertType\": \"GAS_DETECTED\",\n  \"severity\": \"CRITICAL\",\n  \"message\": \"Gas level exceeded 700 ppm\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create No Reading Rule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/alert-rules",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"NO_READING\",\n  \"operator\": null,\n  \"thresholdValue\": null,\n  \"expectedBooleanValue\": null,\n  \"durationMinutes\": 5,\n  \"alertType\": \"DEVICE_OFFLINE\",\n  \"severity\": \"WARNING\",\n  \"message\": \"Sensor stopped reporting for 5 minutes\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Sensor Alert Rules",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/alert-rules"
+          }
+        },
+        {
+          "name": "Update Sensor Alert Rule",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/sensor-alert-rules/{{sensorAlertRuleId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operator\": \"GREATER_THAN_OR_EQUAL\",\n  \"thresholdValue\": 700,\n  \"expectedBooleanValue\": null,\n  \"durationMinutes\": null,\n  \"alertType\": \"GAS_DETECTED\",\n  \"severity\": \"CRITICAL\",\n  \"message\": \"Gas level is at or above 700 ppm\",\n  \"enabled\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Disable Sensor Alert Rule",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/sensor-alert-rules/{{sensorAlertRuleId}}/disable"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Access RFID",
+      "item": [
+        {
+          "name": "Create Access Reader",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('readerId', json.id);",
+                  "  pm.collectionVariables.set('readerCode', json.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/access/readers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"code\": \"{{readerCode}}\",\n  \"type\": \"RFID_RC522\",\n  \"location\": \"Main entrance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Access Readers",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/access/readers"
+          }
+        },
+        {
+          "name": "Create RFID Card",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('cardId', json.id);",
+                  "  pm.collectionVariables.set('cardUid', json.uid);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/access/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"{{cardUid}}\",\n  \"ownerName\": \"Mauricio Test\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List RFID Cards",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/access/cards"
+          }
+        },
+        {
+          "name": "Scan Access Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/access/events/scan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"readerCode\": \"{{readerCode}}\",\n  \"cardUid\": \"{{cardUid}}\",\n  \"occurredAt\": \"{{$isoTimestamp}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Access Events",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/access/events"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Actuators",
+      "item": [
+        {
+          "name": "Create Actuator",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('actuatorId', json.id);",
+                  "  pm.collectionVariables.set('actuatorCode', json.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/actuators",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"code\": \"{{actuatorCode}}\",\n  \"name\": \"Door lock relay\",\n  \"type\": \"RELAY\",\n  \"location\": \"Main entrance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Actuators",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/actuators"
+          }
+        },
+        {
+          "name": "Send Actuator Command",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/actuators/{{actuatorId}}/commands",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"command\": \"UNLOCK\",\n  \"payload\": \"{\\\"durationSeconds\\\":5}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Actuator Commands",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/actuators/{{actuatorId}}/commands"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "Create Alert",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('alertId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/alerts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"sensorId\": \"{{sensorId}}\",\n  \"type\": \"GAS_DETECTED\",\n  \"severity\": \"CRITICAL\",\n  \"message\": \"Gas level exceeded safe threshold\",\n  \"occurredAt\": \"{{$isoTimestamp}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Alerts",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/alerts"
+          }
+        },
+        {
+          "name": "Acknowledge Alert",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/alerts/{{alertId}}/acknowledge"
+          }
+        },
+        {
+          "name": "Resolve Alert",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/alerts/{{alertId}}/resolve"
+          }
+        }
+      ]
+    }
+  ]
+}
