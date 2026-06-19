@@ -136,8 +136,38 @@ public class SensorService {
         }
 
         int boundedLimit = limit == null ? 100 : Math.min(Math.max(limit, 1), 1000);
-        return readingRepository.findReadings(sensorId, from, to, PageRequest.of(0, boundedLimit))
-                .stream()
+
+        var pageable = PageRequest.of(0, boundedLimit);
+
+        List<SensorReading> readings;
+
+        if (from != null && to != null) {
+            readings = readingRepository.findBySensorIdAndRecordedAtBetweenOrderByRecordedAtDesc(
+                    sensorId,
+                    from,
+                    to,
+                    pageable
+            );
+        } else if (from != null) {
+            readings = readingRepository.findBySensorIdAndRecordedAtGreaterThanEqualOrderByRecordedAtDesc(
+                    sensorId,
+                    from,
+                    pageable
+            );
+        } else if (to != null) {
+            readings = readingRepository.findBySensorIdAndRecordedAtLessThanEqualOrderByRecordedAtDesc(
+                    sensorId,
+                    to,
+                    pageable
+            );
+        } else {
+            readings = readingRepository.findBySensorIdOrderByRecordedAtDesc(
+                    sensorId,
+                    pageable
+            );
+        }
+
+        return readings.stream()
                 .map(sensorMapper::toResponse)
                 .toList();
     }
