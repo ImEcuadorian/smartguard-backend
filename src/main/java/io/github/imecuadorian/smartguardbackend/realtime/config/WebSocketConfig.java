@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             @Value("${smartguard.websocket.endpoint:/ws}") String endpoint,
             @Value("${smartguard.websocket.topic-prefix:/topic}") String topicPrefix,
             @Value("${smartguard.websocket.app-prefix:/app}") String appPrefix,
-            @Value("${smartguard.websocket.allowed-origins:http://localhost:3000,http://localhost:19006}")
+            @Value("${smartguard.websocket.allowed-origins:http://localhost:3000,http://localhost:19006,http://10.0.2.2:8080}")
             String allowedOrigins
     ) {
         this.endpoint = endpoint;

@@ -50,7 +50,7 @@ smartguard:
     topic-prefix: ${MQTT_TOPIC_PREFIX:smartguard}
 
   websocket:
-    allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:19006}
+    allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:19006,http://10.0.2.2:8080}
     endpoint: ${WEBSOCKET_ENDPOINT:/ws}
     topic-prefix: ${WEBSOCKET_TOPIC_PREFIX:/topic}
     app-prefix: ${WEBSOCKET_APP_PREFIX:/app}

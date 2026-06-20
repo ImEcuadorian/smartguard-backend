@@ -22,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Configuration
 @EnableWebSecurity
@@ -85,10 +86,17 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(
             @Value("${smartguard.cors.allowed-origins:http://localhost:3000,http://localhost:19006}")
-            String allowedOrigins
+            String allowedOrigins,
+            @Value("${smartguard.websocket.allowed-origins:http://localhost:3000,http://localhost:19006}")
+            String websocketAllowedOrigins
     ) {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(parseOrigins(allowedOrigins));
+        configuration.setAllowedOrigins(Stream.concat(
+                        parseOrigins(allowedOrigins).stream(),
+                        parseOrigins(websocketAllowedOrigins).stream()
+                )
+                .distinct()
+                .toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Device-Key"));
         configuration.setExposedHeaders(List.of("Location"));
