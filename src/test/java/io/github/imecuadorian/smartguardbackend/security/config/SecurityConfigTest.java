@@ -1,5 +1,6 @@
 package io.github.imecuadorian.smartguardbackend.security.config;
 
+import jakarta.servlet.DispatcherType;
 import io.github.imecuadorian.smartguardbackend.device.api.DeviceController;
 import io.github.imecuadorian.smartguardbackend.device.application.DeviceService;
 import io.github.imecuadorian.smartguardbackend.security.application.JwtPrincipal;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,6 +42,15 @@ class SecurityConfigTest {
 
         mockMvc.perform(get("/api/v1/devices"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void internalErrorDispatchDoesNotBecomeUnauthorized() throws Exception {
+        mockMvc.perform(get("/error").with(request -> {
+                    request.setDispatcherType(DispatcherType.ERROR);
+                    return request;
+                }))
+                .andExpect(result -> assertThat(result.getResponse().getStatus()).isNotEqualTo(401));
     }
 
     @Test

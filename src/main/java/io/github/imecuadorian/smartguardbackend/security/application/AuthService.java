@@ -93,7 +93,7 @@ public class AuthService {
         return authResponse(userRepository.save(user));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         var user = userRepository.findByUsername(request.username().trim())
                 .orElseThrow(() -> new AuthenticationFailedException("Invalid username or password"));

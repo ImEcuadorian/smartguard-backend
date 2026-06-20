@@ -1,6 +1,7 @@
 package io.github.imecuadorian.smartguardbackend.security.config;
 
 import io.github.imecuadorian.smartguardbackend.security.application.JwtService;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,7 @@ public class SecurityConfig {
                         (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
                 ))
                 .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/api-docs", "/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST,

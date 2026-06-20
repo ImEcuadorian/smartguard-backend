@@ -126,7 +126,15 @@ public class AccessService {
     @Transactional(readOnly = true)
     public List<AccessEventResponse> findEvents(Instant from, Instant to, Integer limit) {
         int boundedLimit = limit == null ? 100 : Math.min(Math.max(limit, 1), 1000);
-        return eventRepository.findEvents(from, to, PageRequest.of(0, boundedLimit))
+        var pageable = PageRequest.of(0, boundedLimit);
+        var events = from == null && to == null
+                ? eventRepository.findAllByOrderByOccurredAtDesc(pageable)
+                : from == null
+                ? eventRepository.findByOccurredAtLessThanEqualOrderByOccurredAtDesc(to, pageable)
+                : to == null
+                ? eventRepository.findByOccurredAtGreaterThanEqualOrderByOccurredAtDesc(from, pageable)
+                : eventRepository.findByOccurredAtBetweenOrderByOccurredAtDesc(from, to, pageable);
+        return events
                 .stream()
                 .map(accessMapper::toResponse)
                 .toList();

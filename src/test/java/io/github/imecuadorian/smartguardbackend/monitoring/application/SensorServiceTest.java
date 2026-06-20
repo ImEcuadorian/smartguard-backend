@@ -152,7 +152,8 @@ class SensorServiceTest {
                 Instant.parse("2026-06-04T01:00:00Z"));
 
         when(sensorRepository.existsById(SENSOR_ID)).thenReturn(true);
-        when(readingRepository.findReadings(eq(SENSOR_ID), eq(from), eq(to), any(Pageable.class)))
+        when(readingRepository.findBySensorIdAndRecordedAtBetweenOrderByRecordedAtDesc(
+                eq(SENSOR_ID), eq(from), eq(to), any(Pageable.class)))
                 .thenReturn(List.of(reading));
 
         var readings = sensorService.findReadings(SENSOR_ID, from, to, 50);

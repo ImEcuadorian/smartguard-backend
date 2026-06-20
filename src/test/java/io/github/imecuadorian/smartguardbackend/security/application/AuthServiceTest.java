@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -88,6 +89,15 @@ class AuthServiceTest {
         assertThat(response.accessToken()).isEqualTo("token");
         assertThat(response.refreshToken()).isEqualTo("refresh-token");
         assertThat(response.username()).isEqualTo("admin");
+    }
+
+    @Test
+    void loginUsesWritableTransactionBecauseItCreatesRefreshToken() throws Exception {
+        var transaction = AuthService.class.getDeclaredMethod("login", LoginRequest.class)
+                .getAnnotation(Transactional.class);
+
+        assertThat(transaction).isNotNull();
+        assertThat(transaction.readOnly()).isFalse();
     }
 
     @Test

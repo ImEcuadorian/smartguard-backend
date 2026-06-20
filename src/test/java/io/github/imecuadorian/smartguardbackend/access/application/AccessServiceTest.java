@@ -15,12 +15,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,5 +83,51 @@ class AccessServiceTest {
 
         assertThat(response.result()).isEqualTo(AccessResult.DENIED);
         assertThat(response.reason()).isEqualTo("Card is not registered");
+    }
+
+    @Test
+    void findEventsWithoutDatesUsesUnfilteredQuery() {
+        when(eventRepository.findAllByOrderByOccurredAtDesc(any(Pageable.class))).thenReturn(List.of());
+
+        assertThat(accessService.findEvents(null, null, 5)).isEmpty();
+
+        verify(eventRepository).findAllByOrderByOccurredAtDesc(any(Pageable.class));
+    }
+
+    @Test
+    void findEventsWithOnlyFromUsesLowerBoundQuery() {
+        var from = Instant.parse("2026-06-01T00:00:00Z");
+        when(eventRepository.findByOccurredAtGreaterThanEqualOrderByOccurredAtDesc(
+                eq(from), any(Pageable.class))).thenReturn(List.of());
+
+        assertThat(accessService.findEvents(from, null, 5)).isEmpty();
+
+        verify(eventRepository).findByOccurredAtGreaterThanEqualOrderByOccurredAtDesc(
+                eq(from), any(Pageable.class));
+    }
+
+    @Test
+    void findEventsWithOnlyToUsesUpperBoundQuery() {
+        var to = Instant.parse("2026-06-30T23:59:59Z");
+        when(eventRepository.findByOccurredAtLessThanEqualOrderByOccurredAtDesc(
+                eq(to), any(Pageable.class))).thenReturn(List.of());
+
+        assertThat(accessService.findEvents(null, to, 5)).isEmpty();
+
+        verify(eventRepository).findByOccurredAtLessThanEqualOrderByOccurredAtDesc(
+                eq(to), any(Pageable.class));
+    }
+
+    @Test
+    void findEventsWithBothDatesUsesRangeQuery() {
+        var from = Instant.parse("2026-06-01T00:00:00Z");
+        var to = Instant.parse("2026-06-30T23:59:59Z");
+        when(eventRepository.findByOccurredAtBetweenOrderByOccurredAtDesc(
+                eq(from), eq(to), any(Pageable.class))).thenReturn(List.of());
+
+        assertThat(accessService.findEvents(from, to, 5)).isEmpty();
+
+        verify(eventRepository).findByOccurredAtBetweenOrderByOccurredAtDesc(
+                eq(from), eq(to), any(Pageable.class));
     }
 }
