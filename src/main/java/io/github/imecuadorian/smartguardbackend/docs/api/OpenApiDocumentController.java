@@ -60,6 +60,7 @@ public class OpenApiDocumentController {
     private Map<String, Object> paths() {
         Map<String, Object> paths = new LinkedHashMap<>();
         addPath(paths, "POST", "/api/v1/auth/bootstrap-admin", "Bootstrap first admin");
+        addPath(paths, "POST", "/api/v1/auth/register-client", "Register public client account");
         addPath(paths, "POST", "/api/v1/auth/login", "Login");
         addPath(paths, "POST", "/api/v1/auth/refresh", "Refresh access token");
         addPath(paths, "POST", "/api/v1/auth/logout", "Revoke refresh token");
