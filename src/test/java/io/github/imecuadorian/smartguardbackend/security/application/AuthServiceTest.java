@@ -3,6 +3,7 @@ package io.github.imecuadorian.smartguardbackend.security.application;
 import io.github.imecuadorian.smartguardbackend.security.api.BootstrapAdminRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.LoginRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.RefreshTokenRequest;
+import io.github.imecuadorian.smartguardbackend.security.api.RegisterClientRequest;
 import io.github.imecuadorian.smartguardbackend.security.domain.RefreshToken;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserAccount;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserRole;
@@ -73,6 +74,23 @@ class AuthServiceTest {
         assertThat(response.accessToken()).isEqualTo("token");
         assertThat(response.refreshToken()).isEqualTo("refresh-token");
         assertThat(response.role()).isEqualTo(UserRole.ADMIN);
+    }
+
+    @Test
+    void registerClientAlwaysCreatesViewerAccount() {
+        when(userRepository.existsByUsername("client@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("strong-password")).thenReturn("hash");
+        when(userRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = authService.registerClient(new RegisterClientRequest(
+                "client@example.com",
+                "strong-password",
+                "Client Account"
+        ));
+
+        assertThat(response.username()).isEqualTo("client@example.com");
+        assertThat(response.displayName()).isEqualTo("Client Account");
+        assertThat(response.role()).isEqualTo(UserRole.VIEWER);
     }
 
     @Test

@@ -6,6 +6,7 @@ import io.github.imecuadorian.smartguardbackend.security.api.ChangePasswordReque
 import io.github.imecuadorian.smartguardbackend.security.api.LoginRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.LogoutRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.RefreshTokenRequest;
+import io.github.imecuadorian.smartguardbackend.security.api.RegisterClientRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.UserAccountMapper;
 import io.github.imecuadorian.smartguardbackend.security.api.UserAccountResponse;
 import io.github.imecuadorian.smartguardbackend.security.domain.RefreshToken;
@@ -13,6 +14,7 @@ import io.github.imecuadorian.smartguardbackend.security.domain.UserAccount;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserRole;
 import io.github.imecuadorian.smartguardbackend.security.infrastructure.RefreshTokenRepository;
 import io.github.imecuadorian.smartguardbackend.security.infrastructure.UserAccountRepository;
+import io.github.imecuadorian.smartguardbackend.shared.error.DuplicateResourceException;
 import io.github.imecuadorian.smartguardbackend.shared.error.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,6 +93,21 @@ public class AuthService {
                 UserRole.ADMIN
         );
         return authResponse(userRepository.save(user));
+    }
+
+    public UserAccountResponse registerClient(RegisterClientRequest request) {
+        String username = request.username().trim();
+        if (userRepository.existsByUsername(username)) {
+            throw new DuplicateResourceException("Username already exists");
+        }
+
+        var user = new UserAccount(
+                username,
+                passwordEncoder.encode(request.password()),
+                request.displayName(),
+                UserRole.VIEWER
+        );
+        return userAccountMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional
