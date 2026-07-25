@@ -4,7 +4,6 @@ import io.github.imecuadorian.smartguardbackend.security.application.AuthService
 import io.github.imecuadorian.smartguardbackend.security.application.JwtService;
 import io.github.imecuadorian.smartguardbackend.security.config.SecurityConfig;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserRole;
-import io.github.imecuadorian.smartguardbackend.security.domain.UserStatus;
 import io.github.imecuadorian.smartguardbackend.shared.error.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +35,13 @@ class AuthControllerTest {
     @Test
     void publicRegistrationCreatesViewerWithoutAuthentication() throws Exception {
         when(authService.registerClient(any(RegisterClientRequest.class))).thenReturn(
-                new UserAccountResponse(
-                        null,
+                new AuthResponse(
+                        "Bearer",
+                        "access-token",
+                        "refresh-token",
+                        60,
                         "client@example.com",
-                        "Client Account",
-                        UserRole.VIEWER,
-                        UserStatus.ACTIVE,
-                        null,
-                        null
+                        UserRole.VIEWER
                 )
         );
 
@@ -51,12 +49,14 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "username": "client@example.com",
-                                  "password": "strong-password",
-                                  "displayName": "Client Account"
+                                  "displayName": "Client Account",
+                                  "email": "client@example.com",
+                                  "password": "strong-password"
                                 }
                                 """))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.username").value("client@example.com"))
                 .andExpect(jsonPath("$.role").value("VIEWER"));
     }

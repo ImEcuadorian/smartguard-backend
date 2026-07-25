@@ -28,6 +28,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -95,10 +96,10 @@ public class AuthService {
         return authResponse(userRepository.save(user));
     }
 
-    public UserAccountResponse registerClient(RegisterClientRequest request) {
-        String username = request.username().trim();
+    public AuthResponse registerClient(RegisterClientRequest request) {
+        String username = normalizeClientEmail(request.email());
         if (userRepository.existsByUsername(username)) {
-            throw new DuplicateResourceException("Username already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
 
         var user = new UserAccount(
@@ -107,7 +108,7 @@ public class AuthService {
                 request.displayName(),
                 UserRole.VIEWER
         );
-        return userAccountMapper.toResponse(userRepository.save(user));
+        return authResponse(userRepository.save(user));
     }
 
     @Transactional
@@ -187,5 +188,9 @@ public class AuthService {
             throw new AuthenticationFailedException("User is disabled");
         }
         return user;
+    }
+
+    private String normalizeClientEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
