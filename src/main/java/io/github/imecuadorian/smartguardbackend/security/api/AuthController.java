@@ -27,6 +27,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.bootstrapAdmin(request));
     }
 
+    @PostMapping("/register-client")
+    public ResponseEntity<AuthResponse> registerClient(@Valid @RequestBody RegisterClientRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerClient(request));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));

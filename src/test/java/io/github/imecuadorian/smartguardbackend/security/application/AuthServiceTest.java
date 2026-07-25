@@ -3,11 +3,13 @@ package io.github.imecuadorian.smartguardbackend.security.application;
 import io.github.imecuadorian.smartguardbackend.security.api.BootstrapAdminRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.LoginRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.RefreshTokenRequest;
+import io.github.imecuadorian.smartguardbackend.security.api.RegisterClientRequest;
 import io.github.imecuadorian.smartguardbackend.security.domain.RefreshToken;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserAccount;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserRole;
 import io.github.imecuadorian.smartguardbackend.security.infrastructure.RefreshTokenRepository;
 import io.github.imecuadorian.smartguardbackend.security.infrastructure.UserAccountRepository;
+import io.github.imecuadorian.smartguardbackend.shared.error.DuplicateResourceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,7 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -98,6 +101,38 @@ class AuthServiceTest {
 
         assertThat(transaction).isNotNull();
         assertThat(transaction.readOnly()).isFalse();
+    }
+
+    @Test
+    void registerClientCreatesViewerAccountAndSession() {
+        when(userRepository.existsByUsername("client@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("strong-password")).thenReturn("hash");
+        when(userRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.createAccessToken("client@example.com", UserRole.VIEWER)).thenReturn("viewer-token");
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = authService.registerClient(new RegisterClientRequest(
+                "Client User",
+                "Client@Example.com",
+                "strong-password"
+        ));
+
+        assertThat(response.accessToken()).isEqualTo("viewer-token");
+        assertThat(response.refreshToken()).isEqualTo("refresh-token");
+        assertThat(response.username()).isEqualTo("client@example.com");
+        assertThat(response.role()).isEqualTo(UserRole.VIEWER);
+    }
+
+    @Test
+    void registerClientRejectsDuplicatedEmail() {
+        when(userRepository.existsByUsername("client@example.com")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.registerClient(new RegisterClientRequest(
+                "Client User",
+                "client@example.com",
+                "strong-password"
+        ))).isInstanceOf(DuplicateResourceException.class)
+                .hasMessage("Email already exists");
     }
 
     @Test

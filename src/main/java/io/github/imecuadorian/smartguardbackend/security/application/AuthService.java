@@ -6,6 +6,7 @@ import io.github.imecuadorian.smartguardbackend.security.api.ChangePasswordReque
 import io.github.imecuadorian.smartguardbackend.security.api.LoginRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.LogoutRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.RefreshTokenRequest;
+import io.github.imecuadorian.smartguardbackend.security.api.RegisterClientRequest;
 import io.github.imecuadorian.smartguardbackend.security.api.UserAccountMapper;
 import io.github.imecuadorian.smartguardbackend.security.api.UserAccountResponse;
 import io.github.imecuadorian.smartguardbackend.security.domain.RefreshToken;
@@ -13,6 +14,7 @@ import io.github.imecuadorian.smartguardbackend.security.domain.UserAccount;
 import io.github.imecuadorian.smartguardbackend.security.domain.UserRole;
 import io.github.imecuadorian.smartguardbackend.security.infrastructure.RefreshTokenRepository;
 import io.github.imecuadorian.smartguardbackend.security.infrastructure.UserAccountRepository;
+import io.github.imecuadorian.smartguardbackend.shared.error.DuplicateResourceException;
 import io.github.imecuadorian.smartguardbackend.shared.error.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -89,6 +92,21 @@ public class AuthService {
                 passwordEncoder.encode(request.password()),
                 request.displayName(),
                 UserRole.ADMIN
+        );
+        return authResponse(userRepository.save(user));
+    }
+
+    public AuthResponse registerClient(RegisterClientRequest request) {
+        String username = normalizeClientEmail(request.email());
+        if (userRepository.existsByUsername(username)) {
+            throw new DuplicateResourceException("Email already exists");
+        }
+
+        var user = new UserAccount(
+                username,
+                passwordEncoder.encode(request.password()),
+                request.displayName(),
+                UserRole.VIEWER
         );
         return authResponse(userRepository.save(user));
     }
@@ -170,5 +188,9 @@ public class AuthService {
             throw new AuthenticationFailedException("User is disabled");
         }
         return user;
+    }
+
+    private String normalizeClientEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
