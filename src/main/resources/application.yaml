@@ -49,6 +49,12 @@ smartguard:
     password: ${MQTT_PASSWORD:}
     topic-prefix: ${MQTT_TOPIC_PREFIX:smartguard}
 
+  access:
+    auto-unlock:
+      enabled: ${ACCESS_AUTO_UNLOCK_ENABLED:true}
+      actuator-code: ${ACCESS_AUTO_UNLOCK_ACTUATOR_CODE:lock-main}
+      duration-ms: ${ACCESS_AUTO_UNLOCK_DURATION_MS:1000}
+
   websocket:
     allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:19006,http://10.0.2.2:8080}
     endpoint: ${WEBSOCKET_ENDPOINT:/ws}

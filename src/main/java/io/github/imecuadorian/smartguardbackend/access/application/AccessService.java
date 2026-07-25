@@ -38,23 +38,27 @@ public class AccessService {
     private final AccessEventRepository eventRepository;
     private final AccessMapper accessMapper;
     private final RealtimeNotifier realtimeNotifier;
+    private final AccessGrantHandler accessGrantHandler;
 
     public AccessService(DeviceRepository deviceRepository, AccessReaderRepository readerRepository,
                          RfidCardRepository cardRepository, AccessEventRepository eventRepository,
                          AccessMapper accessMapper) {
-        this(deviceRepository, readerRepository, cardRepository, eventRepository, accessMapper, RealtimeNotifier.noop());
+        this(deviceRepository, readerRepository, cardRepository, eventRepository, accessMapper, RealtimeNotifier.noop(),
+                AccessGrantHandler.noop());
     }
 
     @Autowired
     public AccessService(DeviceRepository deviceRepository, AccessReaderRepository readerRepository,
                          RfidCardRepository cardRepository, AccessEventRepository eventRepository,
-                         AccessMapper accessMapper, RealtimeNotifier realtimeNotifier) {
+                         AccessMapper accessMapper, RealtimeNotifier realtimeNotifier,
+                         AccessGrantHandler accessGrantHandler) {
         this.deviceRepository = deviceRepository;
         this.readerRepository = readerRepository;
         this.cardRepository = cardRepository;
         this.eventRepository = eventRepository;
         this.accessMapper = accessMapper;
         this.realtimeNotifier = realtimeNotifier;
+        this.accessGrantHandler = accessGrantHandler;
     }
 
     public AccessReaderResponse createReader(CreateAccessReaderRequest request) {
@@ -102,8 +106,19 @@ public class AccessService {
             reason = "Card authorized";
         }
 
-        var event = new AccessEvent(reader, card, request.cardUid(), result, reason, request.occurredAt());
-        var response = accessMapper.toResponse(eventRepository.save(event));
+        var event = eventRepository.save(new AccessEvent(
+                reader,
+                card,
+                request.cardUid(),
+                result,
+                reason,
+                request.occurredAt()
+        ));
+        if (result == AccessResult.GRANTED) {
+            accessGrantHandler.handleGrantedAccess(event);
+        }
+
+        var response = accessMapper.toResponse(event);
         realtimeNotifier.accessEventCreated(response);
         return response;
     }

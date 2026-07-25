@@ -10,6 +10,7 @@ import io.github.imecuadorian.smartguardbackend.access.infrastructure.AccessEven
 import io.github.imecuadorian.smartguardbackend.access.infrastructure.AccessReaderRepository;
 import io.github.imecuadorian.smartguardbackend.access.infrastructure.RfidCardRepository;
 import io.github.imecuadorian.smartguardbackend.device.domain.Device;
+import io.github.imecuadorian.smartguardbackend.realtime.application.RealtimeNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,11 +41,15 @@ class AccessServiceTest {
     @Mock
     private AccessEventRepository eventRepository;
 
+    @Mock
+    private AccessGrantHandler accessGrantHandler;
+
     private AccessService accessService;
 
     @BeforeEach
     void setUp() {
-        accessService = new AccessService(null, readerRepository, cardRepository, eventRepository, new AccessMapper());
+        accessService = new AccessService(null, readerRepository, cardRepository, eventRepository, new AccessMapper(),
+                RealtimeNotifier.noop(), accessGrantHandler);
     }
 
     @Test
@@ -64,6 +70,7 @@ class AccessServiceTest {
 
         assertThat(response.result()).isEqualTo(AccessResult.GRANTED);
         assertThat(response.reason()).isEqualTo("Card authorized");
+        verify(accessGrantHandler).handleGrantedAccess(any());
     }
 
     @Test
@@ -83,6 +90,7 @@ class AccessServiceTest {
 
         assertThat(response.result()).isEqualTo(AccessResult.DENIED);
         assertThat(response.reason()).isEqualTo("Card is not registered");
+        verifyNoInteractions(accessGrantHandler);
     }
 
     @Test
