@@ -2,7 +2,7 @@ package io.github.imecuadorian.smartguardbackend.monitoring.application;
 
 import io.github.imecuadorian.smartguardbackend.alert.application.AlertService;
 import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorAlertRule;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorAlertRuleType;
+import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorStatus;
 import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorReading;
 import io.github.imecuadorian.smartguardbackend.monitoring.infrastructure.SensorAlertRuleRepository;
 import io.github.imecuadorian.smartguardbackend.monitoring.infrastructure.SensorReadingRepository;
@@ -40,7 +40,15 @@ public class SensorAlertRuleEvaluator {
             return;
         }
 
-        var rules = ruleRepository.findAllBySensorIdAndEnabledTrue(reading.getSensor().getId());
+        if (reading == null
+                || reading.getSensor() == null
+                || reading.getSensor().getStatus() != SensorStatus.ACTIVE) {
+            return;
+        }
+
+        var rules = ruleRepository
+                .findAllBySensorIdAndEnabledTrue(reading.getSensor().getId());
+
         for (SensorAlertRule rule : rules) {
             if (isTriggered(rule, reading)) {
                 alertService.createAutomaticAlertIfAbsent(
