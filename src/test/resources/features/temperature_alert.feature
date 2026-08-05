@@ -24,3 +24,9 @@ Característica: Generación de alertas por temperatura
     Dado que existe una regla desactivada con un umbral de 28 grados
     Cuando el sensor registra una temperatura de 32 grados
     Entonces el sistema no debe generar una alerta
+
+  Escenario: No generar una alerta cuando el sensor está en mantenimiento
+    Dado que existe una regla activa con un umbral de 28 grados
+    Y el sensor se encuentra en mantenimiento
+    Cuando el sensor registra una temperatura de 32 grados
+    Entonces el sistema no debe generar una alerta

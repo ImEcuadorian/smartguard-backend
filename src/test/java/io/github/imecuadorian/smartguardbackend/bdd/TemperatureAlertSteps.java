@@ -9,12 +9,7 @@ import io.github.imecuadorian.smartguardbackend.alert.domain.AlertSeverity;
 import io.github.imecuadorian.smartguardbackend.alert.domain.AlertType;
 import io.github.imecuadorian.smartguardbackend.device.domain.Device;
 import io.github.imecuadorian.smartguardbackend.monitoring.application.SensorAlertRuleEvaluator;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.ComparisonOperator;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.Sensor;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorAlertRule;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorAlertRuleType;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorReading;
-import io.github.imecuadorian.smartguardbackend.monitoring.domain.SensorType;
+import io.github.imecuadorian.smartguardbackend.monitoring.domain.*;
 import io.github.imecuadorian.smartguardbackend.monitoring.infrastructure.SensorAlertRuleRepository;
 import io.github.imecuadorian.smartguardbackend.monitoring.infrastructure.SensorReadingRepository;
 
@@ -93,6 +88,11 @@ public class TemperatureAlertSteps {
         when(
                 ruleRepository.findAllBySensorIdAndEnabledTrue(sensor.getId())
         ).thenReturn(List.of());
+    }
+
+    @Given("el sensor se encuentra en mantenimiento")
+    public void elSensorSeEncuentraEnMantenimiento() {
+        sensor.updateStatus(SensorStatus.MAINTENANCE);
     }
 
     @When("el sensor registra una temperatura de {int} grados")
